@@ -1,0 +1,16 @@
+{
+  "name": "hd-chart",
+  "version": "1.0.0",
+  "description": "Human Design chart calculator that runs entirely in the browser",
+  "license": "MIT",
+  "author": "Whitespace",
+  "scripts": {
+    "test": "node tests/test.js && node tests/test_dom.js"
+  },
+  "dependencies": {
+    "astronomy-engine": "^2.1.19"
+  },
+  "devDependencies": {
+    "jsdom": "^29.0.0"
+  }
+}
