@@ -1,8 +1,10 @@
 # hd-chart
 
-A Human Design chart calculator that runs entirely in your browser. Enter a birth date, time, and timezone, get the full chart: type, strategy, inner authority, profile, definition, incarnation cross, defined centers, channels, all 26 activations, and the bodygraph.
+A Human Design chart calculator that runs entirely in your browser. Enter a birth date, time, and place, get the full chart: type, strategy, inner authority, profile, definition, incarnation cross, defined centers, channels, all 26 activations, and the bodygraph.
 
-The point: your birth data never leaves your device. No account, no email, no name field, no analytics, no server. After the page loads it makes zero network requests. You can check that in the network tab, or turn your wifi off and use it anyway.
+The point: your birth data never leaves your device. No account, no email, no name field, no analytics, no server. Even the birthplace search is local, a bundled GeoNames extract of 52000 places (suburb level for Australia) that resolves your town to its timezone on your machine. After the page loads it makes zero network requests. You can check that in the network tab, or turn your wifi off and use it anyway.
+
+The place lookup earns its keep on timezone edge cases too. Someone born in Broken Hill NSW is on Adelaide time, and Lord Howe Island runs on its own half hour offset. Typing the actual town gets those right where "just put Sydney" would not.
 
 ## Why
 
@@ -34,10 +36,12 @@ The page also answers a question the chart sites don't: how exact does the birth
 
 `tools/hd.py` is the same engine in Python (needs `pip install skyfield`, downloads the JPL ephemeris file on first run). `tools/validate.py` reruns the reference chart checks. Handy if you want to generate charts offline in a script.
 
+`tools/build_places.py` rebuilds `places.json` from GeoNames dumps. The shipped one covers world cities over 15000 people plus every named populated place in Australia. Drop more country files in and rerun it to widen coverage.
+
 ## Hosting it yourself
 
 It's static files. Serve the repo root with anything, or fork and turn on GitHub Pages.
 
 ## License
 
-MIT. Bundled astronomy-engine and the bodygraph renderer are MIT too, see LICENSE for notices. No affiliation with Jovian Archive. This computes the chart; what it means, if anything, is your business.
+MIT. Bundled astronomy-engine and the bodygraph renderer are MIT too, see LICENSE for notices. Place data from GeoNames, CC BY 4.0. No affiliation with Jovian Archive. This computes the chart; what it means, if anything, is your business.

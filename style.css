@@ -65,6 +65,25 @@ input {
 }
 input:focus { outline: 2px solid var(--accent); border-color: transparent; }
 
+.combo { position: relative; display: flex; flex-direction: column; }
+.combo input { width: 100%; }
+#place-suggestions {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  z-index: 5;
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.25);
+  max-height: 260px;
+  overflow-y: auto;
+}
+.sugg { padding: 8px 12px; cursor: pointer; font-size: 0.92rem; }
+.sugg:hover, .sugg.active { background: var(--accent); color: var(--accent-ink); }
+#tz-line { color: var(--accent); }
+
 button {
   grid-column: 1 / -1;
   font: inherit;

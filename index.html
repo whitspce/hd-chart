@@ -25,19 +25,22 @@
       <div class="field">
         <label for="btime">Time of birth</label>
         <input type="time" id="btime" required>
-        <small>Local clock time at the place of birth, 24 hour clock.</small>
+        <small>Local time at the place of birth.</small>
       </div>
-      <div class="field">
-        <label for="btz">Birthplace timezone</label>
-        <input type="text" id="btz" list="tz-list" required placeholder="Australia/Sydney" autocomplete="off" spellcheck="false">
-        <datalist id="tz-list"></datalist>
-        <small>Start typing the nearest major city. Historical daylight saving is handled automatically. Only the timezone matters, the chart is the same anywhere inside it.</small>
+      <div class="field place-field">
+        <label for="bplace">Place of birth</label>
+        <div class="combo">
+          <input type="text" id="bplace" required placeholder="Suburb, town, or city" autocomplete="off" spellcheck="false">
+          <div id="place-suggestions" hidden></div>
+        </div>
+        <small id="tz-line"></small>
+        <small>Type it and pick from the list. Only the timezone is used, so anywhere nearby works. Historical daylight saving is handled automatically.</small>
       </div>
       <button type="submit">Calculate chart</button>
       <p class="sample-row">or try a documented chart:
-        <a href="#" data-sample="1948-04-09,00:05,America/Toronto">Ra Uru Hu</a>,
-        <a href="#" data-sample="1961-08-04,19:24,Pacific/Honolulu">Barack Obama</a>,
-        <a href="#" data-sample="1958-08-16,07:05,America/Detroit">Madonna</a>
+        <a href="#" data-sample="1948-04-09;00:05;America/Toronto;Montreal, Quebec, Canada">Ra Uru Hu</a>,
+        <a href="#" data-sample="1961-08-04;19:24;Pacific/Honolulu;Honolulu, Hawaii, United States">Barack Obama</a>,
+        <a href="#" data-sample="1958-08-16;07:05;America/Detroit;Bay City, Michigan, United States">Madonna</a>
       </p>
     </form>
   </section>
@@ -55,28 +58,18 @@
       <div class="sensitivity">
         <button type="button" id="window-btn">How exact does the birth time need to be?</button>
         <p id="window-out"></p>
+        <p class="fineprint">Worth running if the birth time is approximate or fell during a daylight saving changeover.</p>
       </div>
     </div>
-  </section>
-
-  <section class="card prose">
-    <h2>Why this exists</h2>
-    <p>The popular chart websites ask for your full name, email, and exact birth data. Several of them keep that indefinitely and use it for marketing. At least one widely embedded chart widget is built as a lead capture tool that tags you by traits derived from your birth data.</p>
-    <p>None of that is needed. The calculation uses your birth date, time, and timezone. Your name plays no part in the math, and the place of birth only matters for converting local time to universal time.</p>
-    <p>This page does the same calculation locally. You can open your browser's network tab and watch: after the page loads, no requests are made. It also works with the internet disconnected.</p>
-
-    <h2>How it works</h2>
-    <p>A Human Design chart is two snapshots of the sky. One at your birth, called Personality, and one at the moment the Sun sat exactly 88 degrees of arc earlier, called Design, roughly three months before. The positions of the Sun, Moon, planets, and lunar nodes are mapped onto a wheel of 64 gates, six lines each. Fixed tables pair gates into channels and channels define centers. Type, authority, profile, and the rest follow mechanically from that.</p>
-    <p>Planetary positions come from the astronomy-engine library, which agrees with the professional ephemerides used by the official calculators to within a couple of arcseconds. Each line on the wheel is more than three thousand arcseconds wide, so the results match. The engine reproduces four independently documented reference charts exactly, down to the line, and agrees with a second implementation built on NASA JPL data on every one of 1040 test activations. The test suite ships in the repository.</p>
-
-    <p class="fineprint">Charts for births between 1800 and 2099. If you were born during the hour a daylight saving change took effect, or your birth time is a guess, use the sensitivity check above the details section. No interpretation is offered here, only the chart. Whether the chart means anything is between you and whoever asked for it.</p>
   </section>
 </main>
 
 <footer>
-  <p><a href="https://github.com/whitspce/hd-chart">Source code</a>. MIT licensed.
+  <p>Runs entirely in this page, works offline, keeps nothing.
+  <a href="https://github.com/whitspce/hd-chart">Source code and accuracy tests</a>. MIT licensed.
   Astronomy by <a href="https://github.com/cosinekitty/astronomy">astronomy-engine</a>,
-  bodygraph drawing adapted from <a href="https://www.npmjs.com/package/@gonzih/hd-bodygraph">hd-bodygraph</a>.</p>
+  bodygraph drawing adapted from <a href="https://www.npmjs.com/package/@gonzih/hd-bodygraph">hd-bodygraph</a>,
+  place lookup from <a href="https://www.geonames.org/">GeoNames</a> (CC BY 4.0).</p>
 </footer>
 
 <script src="astronomy.browser.min.js"></script>
