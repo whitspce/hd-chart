@@ -73,7 +73,8 @@ DESIGN_ARC_DEG = 88.0
 
 # ------------------------------------------------------------- ephemeris
 
-_load = Loader(".", verbose=False)
+import os
+_load = Loader(os.path.dirname(os.path.abspath(__file__)), verbose=False)
 _ts = _load.timescale()
 _eph = _load("de421.bsp")
 _earth = _eph["earth"]
