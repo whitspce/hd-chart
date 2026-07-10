@@ -64,7 +64,7 @@
     Manifestor: { strategy: "To inform", signature: "Peace", notSelf: "Anger" },
     Generator: { strategy: "To respond", signature: "Satisfaction", notSelf: "Frustration" },
     "Manifesting Generator": { strategy: "To respond", signature: "Satisfaction", notSelf: "Frustration" },
-    Projector: { strategy: "Wait for the invitation", signature: "Success", notSelf: "Bitterness" },
+    Projector: { strategy: "Wait for recognition and the invitation", signature: "Success", notSelf: "Bitterness" },
     Reflector: { strategy: "Wait a lunar cycle", signature: "Surprise", notSelf: "Disappointment" }
   };
 
