@@ -6,6 +6,14 @@
   var suggBox = document.getElementById("place-suggestions");
   var tzLine = document.getElementById("tz-line");
   var results = document.getElementById("results");
+  var timeInput = document.getElementById("btime");
+  var unknownBox = document.getElementById("btime-unknown");
+  var sweepCard = document.getElementById("sweep-card");
+  var sweepSummary = document.getElementById("sweep-summary");
+  var sweepOut = document.getElementById("sweep-out");
+  var chartCards = ["stats-card", "graph-card", "details-card"].map(function (id) {
+    return document.getElementById(id);
+  });
   var statsEl = document.getElementById("stats");
   var detailsEl = document.getElementById("details");
   var graphEl = document.getElementById("bodygraph");
@@ -234,6 +242,83 @@
     }
   }
 
+  // -------------------------------------------------- unknown time sweep
+
+  function fmtMin(m) {
+    var h = Math.floor(m / 60), mi = m % 60;
+    return (h < 10 ? "0" : "") + h + ":" + (mi < 10 ? "0" : "") + mi;
+  }
+
+  function factRows(segments, label, get) {
+    var runs = [];
+    segments.forEach(function (s) {
+      var v = get(s.facts);
+      var last = runs[runs.length - 1];
+      if (last && last.v === v) last.to = s.to;
+      else runs.push({ v: v, from: s.from, to: s.to });
+    });
+    var distinct = {};
+    runs.forEach(function (r) { distinct[r.v] = 1; });
+    if (Object.keys(distinct).length === 1) {
+      return "<tr><td>" + esc(label) + "</td><td>" + esc(runs[0].v) +
+        "</td><td>all day</td></tr>";
+    }
+    return runs.map(function (r, i) {
+      return "<tr><td>" + (i === 0 ? esc(label) : "") + "</td><td>" +
+        esc(r.v) + "</td><td>" + fmtMin(r.from) + " to " + fmtMin(r.to) +
+        "</td></tr>";
+    }).join("");
+  }
+
+  function runSweep(dateStr, place) {
+    var d = dateStr.split("-").map(Number);
+    sweepSummary.textContent = "Checking every minute of the day...";
+    sweepOut.innerHTML = "";
+    chartCards.forEach(function (c) { c.hidden = true; });
+    sweepCard.hidden = false;
+    results.hidden = false;
+    setTimeout(function () {
+      var job, segs;
+      try {
+        job = HD.daySweep(d[0], d[1], d[2], place.tz);
+        while (!job.done) job.tick();
+        segs = job.segments;
+      } catch (e) {
+        sweepSummary.textContent = "Could not calculate: " + e.message;
+        return;
+      }
+      var combos = {};
+      segs.forEach(function (s) {
+        combos[s.facts.type + s.facts.profile + s.facts.authority] = 1;
+      });
+      var n = Object.keys(combos).length;
+      sweepSummary.textContent = n === 1 ?
+        "The headline facts are the same at every minute of this day, so " +
+        "not knowing the time does not matter here." :
+        "Born on this date in " + place.label + ", the chart depends on the " +
+        "time. Facts marked all day are certain without it.";
+      sweepOut.innerHTML =
+        "<table><tr><th></th><th>Value</th><th>Birth time</th></tr>" +
+        factRows(segs, "Type", function (f) { return f.type; }) +
+        factRows(segs, "Strategy", function (f) { return f.strategy; }) +
+        factRows(segs, "Inner authority", function (f) { return f.authority; }) +
+        factRows(segs, "Profile", function (f) { return f.profile + " " + f.profileName; }) +
+        factRows(segs, "Definition", function (f) { return f.definition; }) +
+        factRows(segs, "Signature", function (f) { return f.signature; }) +
+        factRows(segs, "Not-self theme", function (f) { return f.notSelf; }) +
+        factRows(segs, "Incarnation cross", function (f) {
+          return f.cross.name + " (" + f.cross.notation + ")";
+        }) +
+        "</table>";
+      try { results.scrollIntoView({ behavior: "smooth", block: "start" }); } catch (e) { }
+    }, 30);
+  }
+
+  unknownBox.addEventListener("change", function () {
+    timeInput.disabled = unknownBox.checked;
+    timeInput.required = !unknownBox.checked;
+  });
+
   form.addEventListener("submit", function (ev) {
     ev.preventDefault();
     var place = resolvePlace();
@@ -243,6 +328,12 @@
       return;
     }
     pick(place);
+    if (unknownBox.checked) {
+      runSweep(document.getElementById("bdate").value, place);
+      return;
+    }
+    sweepCard.hidden = true;
+    chartCards.forEach(function (c) { c.hidden = false; });
     calc(document.getElementById("bdate").value,
       document.getElementById("btime").value, place);
   });
@@ -253,6 +344,11 @@
       var parts = a.getAttribute("data-sample").split(";");
       document.getElementById("bdate").value = parts[0];
       document.getElementById("btime").value = parts[1];
+      unknownBox.checked = false;
+      timeInput.disabled = false;
+      timeInput.required = true;
+      sweepCard.hidden = true;
+      chartCards.forEach(function (c) { c.hidden = false; });
       var place = { label: parts[3], tz: parts[2] };
       pick(place);
       calc(parts[0], parts[1], place);

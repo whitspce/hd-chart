@@ -84,6 +84,18 @@ input:focus { outline: 2px solid var(--accent); border-color: transparent; }
 .sugg:hover, .sugg.active { background: var(--accent); color: var(--accent-ink); }
 #tz-line { color: var(--accent); }
 
+.unknown-row {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 0.85rem;
+  color: var(--muted);
+  margin-top: 2px;
+}
+.unknown-row input { accent-color: var(--accent); }
+input:disabled { opacity: 0.45; }
+#sweep-summary { margin: 0 0 12px; color: var(--muted); }
+
 button {
   grid-column: 1 / -1;
   font: inherit;

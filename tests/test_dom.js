@@ -90,5 +90,39 @@ suggs = d.querySelectorAll("#place-suggestions .sugg");
 expect("fixed offset accepted", suggs.length >= 1 &&
   suggs[0].textContent.indexOf("Fixed offset +10:00") === 0);
 
-console.log(failures ? failures + " FAILURES" : "DOM TEST PASS");
-process.exit(failures ? 1 : 0);
+// unknown time mode: whole day sweep
+var unknown = d.getElementById("btime-unknown");
+unknown.checked = true;
+unknown.dispatchEvent(new w.Event("change", { bubbles: true }));
+expect("time input disabled in unknown mode", d.getElementById("btime").disabled);
+
+type(place, "Macquarie Park");
+d.querySelector("#place-suggestions .sugg").dispatchEvent(
+  new w.Event("mousedown", { bubbles: true, cancelable: true }));
+d.getElementById("bdate").value = "1990-06-15";
+d.getElementById("birth-form").dispatchEvent(
+  new w.Event("submit", { bubbles: true, cancelable: true }));
+expect("sweep card shown", !d.getElementById("sweep-card").hidden);
+expect("chart cards hidden", d.getElementById("stats-card").hidden);
+
+var t0 = Date.now();
+(function poll() {
+  var txt = d.getElementById("sweep-out").textContent;
+  if (txt.indexOf("23:59") >= 0 || txt.indexOf("all day") >= 0) {
+    expect("sweep table rendered", true);
+    expect("sweep finds the known type split",
+      txt.indexOf("Projector") >= 0 && txt.indexOf("Manifestor") >= 0);
+    expect("stable facts marked all day", txt.indexOf("all day") >= 0);
+    finish();
+  } else if (Date.now() - t0 > 60000) {
+    expect("sweep table rendered", false);
+    finish();
+  } else {
+    setTimeout(poll, 200);
+  }
+})();
+
+function finish() {
+  console.log(failures ? failures + " FAILURES" : "DOM TEST PASS");
+  process.exit(failures ? 1 : 0);
+}

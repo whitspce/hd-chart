@@ -71,5 +71,30 @@ if (fs.existsSync(__dirname + "/reference_charts.json")) {
   failures += mismatch;
 }
 
+console.log("== unknown time day sweep ==");
+var sweep = HD.daySweep(1990, 6, 15, "Australia/Sydney");
+while (!sweep.done) sweep.tick();
+var segs = sweep.segments;
+var contiguous = segs[0].from === 0 && segs[segs.length - 1].to === 1439 &&
+  segs.every(function (s, i) { return i === 0 || s.from === segs[i - 1].to + 1; });
+check("sweep segments contiguous over the day", contiguous, true);
+var spotOk = true;
+segs.forEach(function (s) {
+  [s.from, Math.floor((s.from + s.to) / 2), s.to].forEach(function (m) {
+    var c = HD.build(1990, 6, 15, Math.floor(m / 60), m % 60, "Australia/Sydney");
+    if (c.type !== s.facts.type || c.profile !== s.facts.profile ||
+      c.authority !== s.facts.authority || c.definition !== s.facts.definition ||
+      c.cross.notation !== s.facts.cross.notation) {
+      spotOk = false;
+      console.log("  segment mismatch at minute " + m);
+    }
+  });
+});
+check("sweep segments match direct builds at edges and midpoints", spotOk, true);
+console.log("  " + segs.length + " segments; types seen: " +
+  segs.map(function (s) { return s.facts.type; }).filter(function (v, i, a) {
+    return a.indexOf(v) === i;
+  }).join(", "));
+
 console.log(failures === 0 ? "ALL PASS" : failures + " FAILURES");
 process.exit(failures ? 1 : 0);

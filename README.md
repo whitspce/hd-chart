@@ -45,3 +45,7 @@ It's static files. Serve the repo root with anything, or fork and turn on GitHub
 ## License
 
 MIT. Bundled astronomy-engine and the bodygraph renderer are MIT too, see LICENSE for notices. Place data from GeoNames, CC BY 4.0. No affiliation with Jovian Archive. This computes the chart; what it means, if anything, is your business.
+
+## Unknown birth time
+
+Tick "I don't know the birth time" and enter just the date. The engine computes the chart at every minute of the day, finds each transition to the minute, and shows which facts hold all day and which depend on the clock, with time ranges. Type only changes when a fast mover completes or breaks a channel, so it's often stable across a whole day even when the profile isn't. Configurations lasting under six minutes can slip between samples.

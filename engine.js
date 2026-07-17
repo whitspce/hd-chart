@@ -348,9 +348,81 @@
     return { minus: refine(est.bwd, -1), plus: refine(est.fwd, +1) };
   }
 
+  // What the headline facts are at one minute of the day, keyed for
+  // comparison. Line changes inside the same gate only matter through the
+  // Sun (profile), which the profile field captures.
+  function headlineAt(y, mo, d, m, tz) {
+    var c = build(y, mo, d, Math.floor(m / 60), m % 60, tz);
+    return {
+      key: [c.type, c.authority, c.profile, c.definition,
+        c.cross.notation].join("|"),
+      facts: {
+        type: c.type, strategy: c.strategy, authority: c.authority,
+        profile: c.profile, profileName: c.profileName,
+        definition: c.definition, cross: c.cross,
+        signature: c.signature, notSelf: c.notSelf
+      }
+    };
+  }
+
+  // Sweep a whole day for someone whose birth time is unknown. Returns an
+  // incremental job: call tick() repeatedly (it returns progress 0..1);
+  // when done, segments holds [{from, to, facts}] in minutes since 00:00,
+  // boundaries exact to the minute.
+  function daySweep(y, mo, d, tz) {
+    var STEP = 6;
+    var mins = [];
+    for (var m = 0; m < 1440; m += STEP) mins.push(m);
+    if (mins[mins.length - 1] !== 1439) mins.push(1439);
+
+    var samples = [];
+    var job = { done: false, segments: null };
+
+    function at(m) { return headlineAt(y, mo, d, m, tz); }
+
+    // First minute in (lo, hi] whose key differs from leftKey, given
+    // at(lo).key === leftKey and at(hi).key !== leftKey.
+    function firstChange(lo, hi, leftKey) {
+      while (hi - lo > 1) {
+        var mid = (lo + hi) >> 1;
+        if (at(mid).key === leftKey) lo = mid; else hi = mid;
+      }
+      return hi;
+    }
+
+    function finish() {
+      var segs = [];
+      var cur = { from: 0, facts: samples[0].facts, key: samples[0].key };
+      for (var j = 1; j < samples.length; j++) {
+        var pos = samples[j - 1].min;
+        while (cur.key !== samples[j].key) {
+          var b = firstChange(pos, samples[j].min, cur.key);
+          segs.push({ from: cur.from, to: b - 1, facts: cur.facts });
+          var f = at(b);
+          cur = { from: b, facts: f.facts, key: f.key };
+          pos = b;
+        }
+      }
+      segs.push({ from: cur.from, to: 1439, facts: cur.facts });
+      job.segments = segs;
+      job.done = true;
+    }
+
+    job.tick = function () {
+      if (job.done) return 1;
+      var s = at(mins[samples.length]);
+      s.min = mins[samples.length];
+      samples.push(s);
+      if (samples.length === mins.length) { finish(); return 1; }
+      return samples.length / mins.length;
+    };
+    return job;
+  }
+
   return {
     build: build,
     stability: stability,
+    daySweep: daySweep,
     localToUTC: localToUTC,
     gateLine: gateLine,
     positions: positions,

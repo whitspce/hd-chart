@@ -26,6 +26,7 @@
         <label for="btime">Time of birth</label>
         <input type="time" id="btime" required>
         <small>Local time at the place of birth.</small>
+        <label class="unknown-row"><input type="checkbox" id="btime-unknown"> I don't know the birth time</label>
       </div>
       <div class="field place-field">
         <label for="bplace">Place of birth</label>
@@ -46,13 +47,18 @@
   </section>
 
   <section id="results" hidden>
-    <div class="card">
+    <div class="card" id="sweep-card" hidden>
+      <h2>Possible charts for this day</h2>
+      <p id="sweep-summary"></p>
+      <div id="sweep-out"></div>
+    </div>
+    <div class="card" id="stats-card">
       <div class="stats" id="stats"></div>
     </div>
     <div class="card" id="graph-card">
       <div id="bodygraph"></div>
     </div>
-    <div class="card">
+    <div class="card" id="details-card">
       <h2>Details</h2>
       <div id="details"></div>
       <div class="sensitivity">
